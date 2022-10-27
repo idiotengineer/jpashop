@@ -19,7 +19,7 @@ public class Order {
     @Column(name = "order_id")
     private Long id;
 
-    @ManyToOne //Order의 입장에서 Member = 다 대 1
+    @ManyToOne(fetch = FetchType.LAZY) //Order의 입장에서 Member = 다 대 1
     @JoinColumn(name = "member_id")
     private Member member;
     /*
@@ -30,10 +30,19 @@ public class Order {
     -> Order가 연관관계 주인임.
 */
 
-    @OneToMany(mappedBy = "order")
+    @OneToMany(mappedBy = "order",cascade = CascadeType.ALL)
     private List<OrderItem> orderItems = new ArrayList<>();
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    /*
+    fetch = fetchType.LAZY ->
+    즉시로딩 (FetchType.EAGER)은 예측이 어렵고, 어떤 SQL이 실행될지 예측이 어려움. 전부다 LAZY를 쓰는게 좋음.
+    &&
+    모든 엔티티는 목록을 각자 persist 해야함
+    CascadeType.all->
+    List의 목록을 하나씩 영속, 제거 해야하지만 CascadeType.All로 목록을 다 같이 진행해줌.
+    * */
+
     @JoinColumn(name = "delivery_id")
     private Delivery delivery;
       /*
@@ -48,4 +57,29 @@ public class Order {
     private LocalDateTime orderDate;
 
     private OrderStatus status;
+
+
+    // == 연관관계 메서드 == //
+    /*
+        양방향 연결관계 세팅 시
+        Ex) Order & Member
+            Member가 주문 시 -> List <order> orders에 주문을 넣어야함.
+            그래야 Member.getorder에서 주문 조회, Order.orderItems의 주문 목록 조회 가능
+            그리고 Member에 저장 시, Order에도 같은 기능을 수행해놓아야 함. 그것에 대한 기능을 하는것이
+            연관관계 메서드임. (누락도 방지해줌)
+    * */
+    public void setMember(Member member){
+        this.member = member;
+        member.getOrders().add(this);
+    }
+
+    public void addOrderItem(OrderItem orderItem) {
+        orderItems.add(orderItem);
+        orderItem.setOrder(this);
+    }
+
+    public void setDelivery(Delivery delivery) {
+        this.delivery = delivery;
+        delivery.setOrder(this);
+    }
 }
