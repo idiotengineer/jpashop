@@ -17,6 +17,7 @@ public class OrderItem {
     private Long id;
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     @ManyToOne
     @JoinColumn(name = "item_id")
     private Item item;
@@ -29,6 +30,13 @@ public class OrderItem {
 
     @ManyToOne(fetch = FetchType.LAZY)
 >>>>>>> topic
+=======
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "item_id")
+    private Item item;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+>>>>>>> topic3
     @JoinColumn(name = "order_id")
     private Order order;
 

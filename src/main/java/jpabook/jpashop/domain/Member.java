@@ -31,6 +31,7 @@ public class Member {
     FK는 Order가 갖고있다.
     -> DB에서는 주인이라는 개념을 넣고, 둘 중에 하나만 변경 시 참조하도록 JPA가 설정함.
     -> Member는 Member.orders와 Order를 변경해야함 || Order는 FK(Member_id)만 변경하면 됨
+    -> * 주인의 값이 변경 시 FK의 값도 변경시킴
     -> Order가 연관관계 주인임.
         -> mappedBy = member로 지정 -> order.member에 의해 매핑된 것 임을 알림.
         -> orders의 값을 넣어도 FK의 값은 변경되지 않음.

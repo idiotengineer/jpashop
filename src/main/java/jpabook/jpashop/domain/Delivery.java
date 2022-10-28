@@ -16,10 +16,14 @@ public class Delivery {
     private Long id;
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     @OneToOne(mappedBy = "delivery")
 =======
     @OneToOne(mappedBy = "delivery",fetch = FetchType.LAZY)
 >>>>>>> topic
+=======
+    @OneToOne(mappedBy = "delivery",fetch = FetchType.LAZY)
+>>>>>>> topic3
     private Order order;
     /*
     1 대 1 상황에서 연관관계 주인 정하기
