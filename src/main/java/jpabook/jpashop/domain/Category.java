@@ -25,33 +25,16 @@ public class Category {
             inverseJoinColumns = @JoinColumn(name="item_id"))
     private List<Item> items = new ArrayList<>();
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-    @ManyToOne
-=======
     @ManyToOne(fetch = FetchType.LAZY)
->>>>>>> topic
-=======
-    @ManyToOne(fetch = FetchType.LAZY)
->>>>>>> topic3
     @JoinColumn(name = "parent_id")
     private Category parent;
 
     @OneToMany(mappedBy = "parent")
     private List<Category> child = new ArrayList<>();
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-=======
->>>>>>> topic3
     // == 연관관계 메서드 == //
     public void addChildCategory(Category child) {
         this.child.add(child);
         child.setParent(this);
     }
-<<<<<<< HEAD
->>>>>>> topic
-=======
->>>>>>> topic3
 }
