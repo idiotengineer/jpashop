@@ -6,7 +6,8 @@ import javax.persistence.Embeddable;
 
 @Embeddable // JPA의 내장타입임을 선언
 @Getter
-public class Address { // 값 타입은 변경불가능하게 해야함 -> setter가 없음
+public class
+Address { // 값 타입은 변경불가능하게 해야함 -> setter가 없음
 
     private String city;
     private String street;

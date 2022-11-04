@@ -43,7 +43,7 @@ public class Order {
     &&
     모든 엔티티는 목록을 각자 persist 해야함
     CascadeType.all->
-    List의 목록을 하나씩 영속, 제거 해야하지만 CascadeType.All로 목록을 다 같이 진행해줌.
+    List의 목록을 하나씩 영속, 제거 해야하지만 CascadeType.All로 다 같이 진행해줌.
     * */
 
     @JoinColumn(name = "delivery_id")
