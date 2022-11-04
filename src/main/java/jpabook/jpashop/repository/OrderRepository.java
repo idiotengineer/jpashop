@@ -72,4 +72,14 @@ public class OrderRepository {
 
         return query.getResultList();
     }
+
+    public List<Order> findAllWithMemberDelivery() {
+        return em.createQuery(
+                "select o from Order o" + " join fetch o.member m" + " join fetch o.delivery d", Order.class
+        ).getResultList();
+    }
+
+    /*
+    Sql (JPQL)로 Order의 member 필드, Order의 delivery 필드를 한방에 (Lazy 무시) 조인하여서 한번에 쿼리로 들고옴. -> fetch
+    * */
 }

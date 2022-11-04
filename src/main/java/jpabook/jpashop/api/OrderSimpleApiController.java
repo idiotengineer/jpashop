@@ -131,4 +131,14 @@ public class OrderSimpleApiController {
         * */
     }
 
+    @GetMapping("/api/v3/simple-orders")
+    public List<SimpleOrderDto> orderV3() {
+        List<Order> orders = orderRepository.findAllWithMemberDelivery();
+        /*
+        Sql (JPQL)로 Order의 member 필드, Order의 delivery 필드를 한방에 조인하여서 한번에 쿼리로 들고옴 (지연로딩 발생안함). -> fetch
+        * */
+
+        List<SimpleOrderDto> result = orders.stream().map(o -> new SimpleOrderDto(o)).collect(Collectors.toList());
+        return result;
+    }
 }
