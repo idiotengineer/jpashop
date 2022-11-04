@@ -1,14 +1,20 @@
 package jpabook.jpashop.api;
 
 
+import jpabook.jpashop.domain.Address;
 import jpabook.jpashop.domain.Order;
+import jpabook.jpashop.domain.OrderStatus;
 import jpabook.jpashop.repository.OrderRepository;
 import jpabook.jpashop.service.OrderSearch;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
@@ -19,7 +25,7 @@ public class OrderSimpleApiController {
     @GetMapping("api/v1/simple-orders")
     public List<Order> ordersV1() {
         List<Order> all = orderRepository.findAllByString(new OrderSearch());
-        for(Order order : all){
+        for (Order order : all) {
             order.getMember().getName(); // Lazy 강제 초기화
             order.getDelivery().getAddress(); // Lazy 강제 초기화
         }
@@ -70,4 +76,59 @@ public class OrderSimpleApiController {
 
 
     * */
+
+    @GetMapping("/api/v2/simple-orders")
+    public List<SimpleOrderDto> orderV2() {
+        List<Order> orders = orderRepository.findAllByString(new OrderSearch());
+        List<SimpleOrderDto> result = orders.stream().map(o -> new SimpleOrderDto(o))
+                .collect(Collectors.toList());
+
+        return result;
+
+        // stream으로 map(a를 b로 바꿈) SimpleOrderDto로 바꾸고 List로 결과반환
+    }
+    /*
+    orderRepository.findAllByString 메서드로 리스트 값을 가져온다.(Order Entity의 리스트임)
+    -> Dto로 변환하여서 쓰는것이 베스트
+        -> SimpleOrderDto라는 Dto 클래스 생성(getter,setter,생성자만 있음)
+    -> List를 반복문 대신, stream을 사용하여 DTO 객체 리스트로 변환하여 리턴
+    * */
+
+    @Data
+    static class SimpleOrderDto {
+        private Long orderId;
+        private String name;
+        private LocalDateTime orderDate;
+        private OrderStatus orderStatus;
+        private Address address;
+
+        public SimpleOrderDto(Order order) {
+            orderId = order.getId();
+            name = order.getMember().getName(); //Member LAZY 초기화호출
+            orderDate = order.getOrderDate();
+            orderStatus = order.getStatus();
+            address = order.getDelivery().getAddress(); //Delivery Lazy 초기화호출
+        }
+
+        /*
+        쿼리 생성 개수가 너무 많다!
+        1. Order
+        2. Member
+        3. Delivery
+        -> 이것을 반복함... ( 3번,6번,9번,,,,)
+            N + 1의 문제가 생김.
+            -> N(2) =  1 + Member(2) + Delivery(2)
+
+        Eager로 하면 어떻게 되는가?
+        1. Order를 가져옴
+        2. Order의 Eager(member)를 또 가져옴.
+        3. Order의 Eager(delivery)를 또 가져옴.
+        -> 개선안됨. 만약 Delivery, Member가 같으면 줄어들긴 하지만 최악에는 N+1로 아주 안좋다...
+
+
+
+
+        * */
+    }
+
 }
