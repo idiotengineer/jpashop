@@ -1,18 +1,14 @@
 package jpabook.jpashop.api;
 
 
-import jpabook.jpashop.domain.Address;
 import jpabook.jpashop.domain.Order;
-import jpabook.jpashop.domain.OrderStatus;
 import jpabook.jpashop.repository.OrderRepository;
+import jpabook.jpashop.repository.OrderSimpleQueryDto;
 import jpabook.jpashop.service.OrderSearch;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -78,9 +74,9 @@ public class OrderSimpleApiController {
     * */
 
     @GetMapping("/api/v2/simple-orders")
-    public List<SimpleOrderDto> orderV2() {
+    public List<OrderSimpleQueryDto> orderV2() {
         List<Order> orders = orderRepository.findAllByString(new OrderSearch());
-        List<SimpleOrderDto> result = orders.stream().map(o -> new SimpleOrderDto(o))
+        List<OrderSimpleQueryDto> result = orders.stream().map(o -> new OrderSimpleQueryDto(o))
                 .collect(Collectors.toList());
 
         return result;
@@ -94,51 +90,27 @@ public class OrderSimpleApiController {
     -> List를 반복문 대신, stream을 사용하여 DTO 객체 리스트로 변환하여 리턴
     * */
 
-    @Data
-    static class SimpleOrderDto {
-        private Long orderId;
-        private String name;
-        private LocalDateTime orderDate;
-        private OrderStatus orderStatus;
-        private Address address;
-
-        public SimpleOrderDto(Order order) {
-            orderId = order.getId();
-            name = order.getMember().getName(); //Member LAZY 초기화호출
-            orderDate = order.getOrderDate();
-            orderStatus = order.getStatus();
-            address = order.getDelivery().getAddress(); //Delivery Lazy 초기화호출
-        }
-
-        /*
-        쿼리 생성 개수가 너무 많다!
-        1. Order
-        2. Member
-        3. Delivery
-        -> 이것을 반복함... ( 3번,6번,9번,,,,)
-            N + 1의 문제가 생김.
-            -> N(2) =  1 + Member(2) + Delivery(2)
-
-        Eager로 하면 어떻게 되는가?
-        1. Order를 가져옴
-        2. Order의 Eager(member)를 또 가져옴.
-        3. Order의 Eager(delivery)를 또 가져옴.
-        -> 개선안됨. 만약 Delivery, Member가 같으면 줄어들긴 하지만 최악에는 N+1로 아주 안좋다...
-
-
-
-
-        * */
-    }
 
     @GetMapping("/api/v3/simple-orders")
-    public List<SimpleOrderDto> orderV3() {
+    public List<OrderSimpleQueryDto> orderV3() {
         List<Order> orders = orderRepository.findAllWithMemberDelivery();
         /*
         Sql (JPQL)로 Order의 member 필드, Order의 delivery 필드를 한방에 조인하여서 한번에 쿼리로 들고옴 (지연로딩 발생안함). -> fetch
         * */
 
-        List<SimpleOrderDto> result = orders.stream().map(o -> new SimpleOrderDto(o)).collect(Collectors.toList());
+        List<OrderSimpleQueryDto> result = orders.stream().map(o -> new OrderSimpleQueryDto(o)).collect(Collectors.toList());
         return result;
     }
+
+    @GetMapping("/api/v4/simple-orders")
+    public List<OrderSimpleQueryDto> orderV4() {
+        return orderRepository.findOrderDtos();
+    }
+    /*
+    내가 원하는 것만 가져오게 Fetch join의 v3/simple-orders의 select 절을 수정한 JPQL을 작성한 v4/simple-orders이다.
+    장점 : 커스텀이 잘 되어있고, 성능이 좋다, select를 정말 원하는 것만 설정가능 쿼리가 더 작다.
+    단점 : 재사용불가, api 스펙에 의존적임
+
+    이건 조회 전용으로 따로 패키지를 만들어 관리하는것이 좋을듯하다.
+    * */
 }

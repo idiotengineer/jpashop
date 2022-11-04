@@ -78,8 +78,23 @@ public class OrderRepository {
                 "select o from Order o" + " join fetch o.member m" + " join fetch o.delivery d", Order.class
         ).getResultList();
     }
-
     /*
     Sql (JPQL)로 Order의 member 필드, Order의 delivery 필드를 한방에 (Lazy 무시) 조인하여서 한번에 쿼리로 들고옴. -> fetch
     * */
+
+
+    public List<OrderSimpleQueryDto> findOrderDtos() {
+        return em.createQuery(
+                        "select new jpabook.jpashop.repository.OrderSimpleQueryDto(o.id,m.name,o.orderDate,o.status,d.address)"+
+                                " from Order o" +
+                                " join o.member m" +
+                                " join o.delivery d", OrderSimpleQueryDto.class)
+                .getResultList();
+
+        /*
+        오류
+        DTO에는 쿼리로 매핑될 수가 없다!.. Entity만 가능하다
+
+        * */
+    }
 }
