@@ -54,7 +54,7 @@ public class OrderSimpleApiController {
         따라서 진짜 객체를 DB에서 가져오는게 아닌, 가짜 프록시를 가져옴. ㅇㅇ 이것이 ByteBuddyInterceptor 클래스이다
 
         해결방법 1
-        - 지연로딩일 경우 출력을 null로 가져오는의 외부라이브러리를 선택해도됨.(Hibernate5Module)
+        - 지연로딩일 경우 출력을 null로 가져오는 외부라이브러리를 선택해도됨.(Hibernate5Module)
         - 사실 지금 이 것은 굳이 할 필요가 없긴 하다.
 
         해결방법 2
