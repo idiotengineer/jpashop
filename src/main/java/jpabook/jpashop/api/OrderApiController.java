@@ -11,6 +11,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.jaxb.SpringDataJaxb;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
@@ -144,5 +145,42 @@ public class OrderApiController {
 
     하지만 아직 엄청난 단점이있는데
     그것은 페이징 처리를 할 수 없다는 것이다...
+    WHy...?
+        -> 메모리에 모든 DB를 불러와서 메모리에서 페이징을 시도 ( 메모리 초과 빵 )
+    * */
+
+
+    @GetMapping("/api/v3.1/orders")
+    public List<OrderDto> ordersV3_page(
+            @RequestParam(value = "offset",defaultValue = "0") int offset,
+            @RequestParam(value = "limit",defaultValue = "100") int limit
+    ) {
+        List<Order> orders = orderRepository.findAllWithMemberDelivery(offset,limit);
+
+        List<OrderDto> result = orders.stream()
+                .map(o -> new OrderDto(o))
+                .collect(Collectors.toList());
+        return result;
+    }
+
+    /*
+    http://localhost:8080/api/v3.1/orders?offset=1&limit=100 호출
+
+    1~100 (원래 0부터 시작)
+    userA를 날리고 userB부터 시작해서 조회 (Delivery, Member, Order에는 페이징 처리가 된 모습을 보임) 그 후 에는 여전히 N + 1 문제 발생
+
+    N + 1 해결 방법
+    1. application.yml에 hibernate에 default_batch_fetch_size 설정
+    실행 ->
+        OrderItem = where orderItem order_id in (4,11)이라고 찍혀 있음.
+        -> 한번에 in 쿼리로 order_id 4 = userA, order_id 11 = userB를 가져옴.
+            -> 대충 해석을 하자면, orders(맨처음) 리스트인 값을 보고 파악하여 관련된 연관된 in 쿼리로 batch_fetch_size 만큼 씩 가져옴.
+            1 : N : N 의 쿼리를 1 : 1 : 1
+
+        Item
+        -> 마찬가지로 2,3,9,11의 상품 id를 한번에 in 쿼리로 order_id의 batch_fetch_size 만큼 씩 가져옴.
+
+
+    2. @BatchSize 애노테이션
     * */
 }

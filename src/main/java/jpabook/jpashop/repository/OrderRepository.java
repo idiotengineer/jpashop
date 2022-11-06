@@ -107,4 +107,21 @@ public class OrderRepository {
                         " join fetch oi.item i", Order.class)
                 .getResultList();
     }
+
+    public List<Order> findAllWithMemberDelivery(int offset, int limit) {
+        return em.createQuery(
+                        "select o from Order o" +
+                                " join fetch o.member m" +
+                                " join fetch o.delivery d", Order.class
+                ).setFirstResult(offset)
+                .setMaxResults(limit)
+                .getResultList();
+    }
+
+    /*
+    Order, Member, Delivery 는 xToOne이기 때문에 Order에서 조회를 할 시 데이터가 뻥튀기 되지않으므로
+    fetch join을 그냥 쓰는게 좋다.
+
+    그리고 ToMany인 OrderItem 혹은 Item은 fetch join 대신, batch를 이용한다!
+    * */
 }
