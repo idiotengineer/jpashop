@@ -5,6 +5,7 @@ import jpabook.jpashop.domain.Order;
 import jpabook.jpashop.domain.OrderItem;
 import jpabook.jpashop.domain.OrderStatus;
 import jpabook.jpashop.repository.OrderRepository;
+import jpabook.jpashop.repository.order.query.OrderFlatDto;
 import jpabook.jpashop.repository.order.query.OrderQueryDto;
 import jpabook.jpashop.repository.order.query.OrderQueryRepository;
 import jpabook.jpashop.service.OrderSearch;
@@ -212,5 +213,18 @@ public class OrderApiController {
 
     /*
     총 쿼리는 2번나감
+    * */
+
+    @GetMapping("/api/v6/orders")
+    public List<OrderFlatDto> ordersV6() {
+        return orderQueryRepository.findAllByDto_flat();
+    }
+
+    /*
+    장점 : 쿼리가 한번만 나감
+    단점 :
+    애플리케이션에서 추가 작업이 엄청 큼( Ex : OrderFlatDto에서 OrderQueryDto로 변경시... 막막함)
+    order 기준으로 페이징 안됨 ( orderItem은 됨..ㅠ)
+    상황에 따라 V5보다 느림.
     * */
 }
