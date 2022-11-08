@@ -113,4 +113,35 @@ public class OrderSimpleApiController {
 
     이건 조회 전용으로 따로 패키지를 만들어 관리하는것이 좋을듯하다.
     * */
+
+
+
+
+
+/*
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+    @GetMapping("api/v1/simple-orders")
+    public List<Order> ordersV1() {
+        List<Order> all = orderRepository.findAllByString(new OrderSearch());
+        for (Order order : all) {
+            order.getMember().getName(); // Lazy 강제 초기화
+            order.getDelivery().getAddress(); // Lazy 강제 초기화
+        }
+        return all;
+    }
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+    -> 이 코드는 DB 커넥션과 영속성 컨텍스트가 살아있는, OSIV가 true일 때만 쓸 수있다.
+        false 일 때 쓴다면
+        LazyInitializationException 터짐
+
+
+    Why??...
+        -> OSIV가 false일 때는 DB 커넥션과 영속성 컨텍스트가 살아있는 상태 가 트랜잭션 범위(Service, Repository)로 줄어들기 때문이다.
+        -> View나 Controller에서 지연로딩은 DB 커넥션, 영속성 컨텍스트가 없기 떄문에 못씀.
+
+   해결방법
+   1. Service 계층에 Dto나 구현 로직을 통째로 다 가져간다. (Controller에는 호출만 하게)
+   2. 커맨드와 쿼리 분리
+
+    */
 }
