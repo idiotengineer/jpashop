@@ -75,9 +75,10 @@ public class OrderQueryRepository {
                                 " from OrderItem oi" +
                                 " join oi.item i" +
                                 " where oi.order.id in :orderIds", OrderItemQueryDto.class)
+                                // = 대신 in을 써서 한번에 하나씩 orderId와 같은 값을 가져오는게 아닌, 한번에 여러개의 orderId와 같은 값을 가져옴.
                 .setParameter("orderIds", orderIds)
                 .getResultList();
-
+                // orderItems는 orderItem의 PK 값이 OrderIds(order의 PK값)에 포함되면 가져옴.
         Map<Long, List<OrderItemQueryDto>> orderItemMap = orderItems.stream()
                 .collect(Collectors.groupingBy(orderItemQueryDto -> orderItemQueryDto.getOrderId()));
 
@@ -89,9 +90,13 @@ public class OrderQueryRepository {
     /*
         1. result =  findOrders로 Order를 Dto로 매핑함 (Order기준 ToMany인 orderItem 제외)
         2. orderIds = result의 id값인 리스트를 만듬.
-        2. orderItems = Order의 XToMany인 OrderItem을 item과 조인하여 (orderIds와 일치한 id 값을) 필요한 데이터만 매핑하여 Dto로 만듬 -> OrderItemQueryDto
+        2. orderItems = Order의 XToMany인 OrderItem을 item과 조인하여 (orderIds에 포함되는 orderitem의 id값으로) 필요한 데이터만 매핑하여 Dto로 만듬 -> OrderItemQueryDto
         3. orderItemMap = orderItems와 ID로 Map을 만듬
-        5. result의 각각의 값의 OrderItem을 orderItemMap으로 설정
+        5. result(Order의 DTO)의 각각의 값의 OrderItem을 orderItemMap으로 설정
+
+        쿼리는 findOrders에서 1번
+        동적쿼리에서 1번
+        -> 총 2번의 쿼리가 나감
     * */
 
 

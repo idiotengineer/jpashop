@@ -209,4 +209,8 @@ public class OrderApiController {
     public List<OrderQueryDto> ordersV5() {
         return orderQueryRepository.findAllByDto_optimization();
     }
+
+    /*
+    총 쿼리는 2번나감
+    * */
 }
