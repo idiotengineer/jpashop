@@ -5,6 +5,8 @@ import jpabook.jpashop.domain.Order;
 import jpabook.jpashop.domain.OrderItem;
 import jpabook.jpashop.domain.OrderStatus;
 import jpabook.jpashop.repository.OrderRepository;
+import jpabook.jpashop.repository.order.query.OrderQueryDto;
+import jpabook.jpashop.repository.order.query.OrderQueryRepository;
 import jpabook.jpashop.service.OrderSearch;
 import lombok.Data;
 import lombok.Getter;
@@ -23,6 +25,7 @@ import java.util.stream.Collectors;
 public class OrderApiController {
 
     private final OrderRepository orderRepository;
+    private final OrderQueryRepository orderQueryRepository;
 
     @GetMapping("/api/v1/orders")
     public List<Order> ordersV1() {
@@ -72,7 +75,6 @@ public class OrderApiController {
             address = order.getDelivery().getAddress();
             order.getOrderItems().stream().forEach(o -> o.getItem().getName());
             orderItems = order.getOrderItems();
-
         }
     }
 */
@@ -152,10 +154,10 @@ public class OrderApiController {
 
     @GetMapping("/api/v3.1/orders")
     public List<OrderDto> ordersV3_page(
-            @RequestParam(value = "offset",defaultValue = "0") int offset,
-            @RequestParam(value = "limit",defaultValue = "100") int limit
+            @RequestParam(value = "offset", defaultValue = "0") int offset,
+            @RequestParam(value = "limit", defaultValue = "100") int limit
     ) {
-        List<Order> orders = orderRepository.findAllWithMemberDelivery(offset,limit);
+        List<Order> orders = orderRepository.findAllWithMemberDelivery(offset, limit);
 
         List<OrderDto> result = orders.stream()
                 .map(o -> new OrderDto(o))
@@ -183,4 +185,28 @@ public class OrderApiController {
 
     2. @BatchSize 애노테이션
     * */
+
+
+    @GetMapping("/api/v4/orders")
+    public List<OrderQueryDto> ordersV4() {
+        return orderQueryRepository.findOrderQueryDtos();
+    }
+
+    /*
+        특정화면에 fit한 Query를 쓸 때(대부분 화면처리)와 단순 API를 제어하는 패키지를 나눠 쓰기도 함.
+
+        맨 위에 OrderDto를 쓰지 않은 이유
+        1. OrderQueryRepository가 OrderApiController를 참조 (Repository가 Contorller를)해버리는 상황이기 떄문에.
+        2. fit한 Dto로 만들어 내기 위해
+
+        순서
+            1. 일단 findOrderDto에서 findOrders를 호출하여 ToOne인 관계를 다 join해서 한번에 불러온다.
+            2. findOrderItems를 호출해서 ToMany관계인 orderItems와 item을 채운다!
+                -> 직접 쿼리를 작성해서
+    * */
+
+    @GetMapping("/api/v5/orders")
+    public List<OrderQueryDto> ordersV5() {
+        return orderQueryRepository.findAllByDto_optimization();
+    }
 }
